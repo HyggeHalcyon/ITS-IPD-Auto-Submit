@@ -35,10 +35,12 @@ def build_ca_bundle() -> str:
     return bundle_path
 
 def check_session() -> bool:
-    client.cookies.set('PHPSESSID', PHPSESSID)
+    for part in COOKIE.split(";"):
+        key, value = part.strip().split("=", 1)
+        client.cookies.set(key, value)
     res = client.get("https://akademik.its.ac.id/home.php", allow_redirects=True)
-    if 'Microsoft' in res.text:
-        log.error('Provide a valid PHPSESSID')
+    if 'Microsoft' in res.text or 'human visitor' in res.text:
+        log.error('Provide a valid cookie')
         exit(1)
     global soup, SEMESTER_TERM, TAHUN_AJARAN
     soup = BeautifulSoup(res.text, 'html.parser')
